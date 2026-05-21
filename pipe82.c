@@ -4,15 +4,13 @@
 #include "tension.h"
 #include "contact.h"
 #include "curvature.h"
-
-// 只引入这一个相变核心库，它会自动搞定所有温度场和扩散方程
 #include "ecipriano/boiling.h" 
 
 #define L_pipe 0.005
 #define R_pipe 0.005
 
 #define T_HOT 413.15      
-#define T_SAT 373.15     // 定义饱和温度宏
+#define T_SAT 373.15     
 
 vector h[];
 h.t[top] = contact_angle (60. * pi / 180.);
@@ -43,7 +41,6 @@ int main() {
   lambda2 = 0.025;    
   dhev = 2.26e6; //2.26e6     
   
-  // 统一下层环境的变量，确保没有冷端
   double Tsat = T_SAT;  
   TL0 = Tsat;        // 液体初始处于饱和预热态
   TG0 = Tsat;        // 气体初始处于饱和预热态     
@@ -67,7 +64,7 @@ event init (t = 0) {
     T[]  = TL[] + TG[]; 
   }
   
-  // 致命破局点：将外面 T 的恒温边界条件，拷贝给底层真正参与计算的 TL 和 TG
+  // 将外面 T 的恒温边界条件，拷贝给底层真正参与计算的 TL 和 TG
   copy_bcs ({TL, TG}, T);
 }
 
@@ -100,7 +97,7 @@ event movie (t += 0.001) {
   sprintf(name_T, "T-%06.4f.png", t);
   output_ppm (T, file = name_T, n = 512, 
               box = {{0,0},{L_pipe, R_pipe}}, 
-              min = T_SAT, max = T_HOT, map = jet); // 更新色带最小值，匹配当前物理场
+              min = T_SAT, max = T_HOT, map = jet); 
               
   scalar un[];
   foreach() un[] = norm(u);
